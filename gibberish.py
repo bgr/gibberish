@@ -45,10 +45,10 @@ def word_occurences(line, prev_word=''):
 
 
 def build_dict(lines_iterable):
-    """ Returns a { word: [(probability, word), ...] } mapping from given
-        iterable.
-        The iterable should produce strings - lines of text (hint: you can pass
-        an open file descriptor).
+    """ Returns a mapping with format { word: { next_word: num_occurences } }.
+
+        The given iterable should produce strings - lines of text (hint: you
+        can pass an open file descriptor).
     """
     prev_word = ''
     d = defaultdict(lambda: defaultdict(int))
