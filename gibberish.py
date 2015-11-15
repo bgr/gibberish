@@ -11,6 +11,8 @@ word_fixes = {
     '--': '-',
 }
 
+NEW_PARAGRAPH = '\n   '
+
 
 def fix_word(word):
     word = word.lower()
@@ -34,9 +36,9 @@ def word_pairs(lines_iterable):
 
         if not yielded and prev_word != '':
             # line had no words, assume it's a start of a new paragraph
-            cur_word = ''
-            yield prev_word, cur_word
-            prev_word = cur_word
+            yield prev_word, '.'
+            yield '.', ''
+            prev_word = ''
 
 
 def build_dict(lines_iterable):
@@ -46,7 +48,7 @@ def build_dict(lines_iterable):
         can pass an open file descriptor).
     """
     occs = defaultdict(lambda: defaultdict(int))
-    # caps = defaultdict(str)
+    caps = {}
 
     for raw_prev_word, raw_cur_word in word_pairs(lines_iterable):
         prev_word = fix_word(raw_prev_word)
@@ -57,10 +59,10 @@ def build_dict(lines_iterable):
         # remember that current word should be capitalized in generated output
         # if it's capitalized in original text and it's not the first word in
         # the sentence
-        # if prev_word not in ['', '.'] and raw_cur_word[:1] != cur_word[:1]:
-            # caps[cur_word] = raw_prev_word
+        if prev_word not in ['', '.'] and raw_cur_word[:1] != cur_word[:1]:
+            caps[cur_word] = raw_cur_word
 
-    return occs
+    return occs, caps
 
 
 def generate_gibberish(lines_iterable, output_words=200):
@@ -71,7 +73,7 @@ def generate_gibberish(lines_iterable, output_words=200):
         given output_words, since it'll continue generating until the current
         sentence ends.
     """
-    d = build_dict(lines_iterable)
+    d, caps = build_dict(lines_iterable)
 
     prev_word = ''
     words = []
@@ -88,15 +90,17 @@ def generate_gibberish(lines_iterable, output_words=200):
         if output_words < 0 and prev_word == '.':
             break
 
-    return words
+    return words, caps
 
 
-def textualize(words):
+def textualize(words, caps_mapping):
     prev_word = ''
 
     for cur_word in words:
+        cur_word = caps_mapping.get(cur_word, cur_word)
+
         if prev_word == '':
-            yield '    '
+            yield NEW_PARAGRAPH
             yield cur_word.capitalize()
         elif cur_word in interpunction:
             yield cur_word
@@ -127,8 +131,8 @@ if __name__ == '__main__':
     path = os.path.abspath(os.path.join('txt_books', 'pg1661.txt'))
 
     with open(path) as f:
-        words = generate_gibberish(gutenberg_sanitized(f))
-        txt = ''.join(textualize(words))
+        words, caps = generate_gibberish(gutenberg_sanitized(f), 400)
+        txt = ''.join(textualize(words, caps))
 
     # prevents unicode errors in Windows terminal
     printable = txt.encode('ascii', 'replace').decode('ascii')

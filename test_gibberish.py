@@ -26,7 +26,7 @@ class Test_build_dict:
         }),
     ])
     def test_words_single_line(self, inp, exp):
-        assert build_dict([inp]) == exp
+        assert build_dict([inp])[0] == exp
 
     @pytest.mark.parametrize('sign', ['.', ',', ';'])
     def test_interpunction_single_line(self, sign):
@@ -37,7 +37,7 @@ class Test_build_dict:
             sign:  { 'bb': 1, 'aa': 1 },
             'bb': { sign: 1 },
         }
-        assert build_dict([inp]) == exp
+        assert build_dict([inp])[0] == exp
 
     @pytest.mark.parametrize('inp, exp', [
         ('A - hyphen -- a - Hyphen', {
@@ -48,10 +48,10 @@ class Test_build_dict:
         }),
     ])
     def test_hyphen_single_line(self, inp, exp):
-        assert build_dict([inp]) == exp
+        assert build_dict([inp])[0] == exp
 
     def test_multiple_empty_lines(self):
-        d = build_dict(['', '   ', ''])
+        d = build_dict(['', '   ', ''])[0]
         assert d[''] == {}
 
     @pytest.mark.parametrize('inp, exp', [
@@ -74,7 +74,7 @@ class Test_build_dict:
         }),
     ])
     def test_lines_no_new_paragraphs(self, inp, exp):
-        assert build_dict(inp) == exp
+        assert build_dict(inp)[0] == exp
 
     @pytest.mark.parametrize('inp, exp', [
         (['Hello', '', '   ', 'world', ' '], {
@@ -89,7 +89,15 @@ class Test_build_dict:
         }),
     ])
     def test_lines_with_new_paragraphs(self, inp, exp):
-        assert build_dict(inp) == exp
+        assert build_dict(inp)[0] == exp
+
+    def test_caps(self):
+        inp = ['Hello John McClane.']
+        caps = build_dict(inp)[1]
+        assert 'hello' not in caps
+        assert caps['john'] == 'John'
+        assert caps['mcclane'] == 'McClane'
+
 
 def test_gutenberg_sanitized():
     lines = [
