@@ -17,31 +17,26 @@ def fix_word(word):
     return word_fixes.get(word, word)
 
 
-def word_occurences(line, prev_word=''):
-    """ Returns a tuple (occurrence_mapping, last_seen_word).
-        The occurrence_mapping is a dict with format:
-            { word: { next_word: num_occurences } }
-    """
-    mapping = {
-        fix_word(prev_word): {}
-    }
+def word_pairs(lines_iterable):
+    prev_word = ''
 
-    for m in matcher.finditer(line):
-        if prev_word not in mapping:
-            mapping[prev_word] = {}
+    for line in lines_iterable:
 
-        d = mapping[prev_word]
+        yielded = False
+        for m in matcher.finditer(line):
+            cur_word = m.group(0)
 
-        raw_word = m.group(0)
-        word = fix_word(raw_word)
+            if (prev_word, cur_word) != ('', ''):
+                yield prev_word, cur_word
+                yielded = True
 
-        if word not in d:
-            d[word] = 0
-        d[word] += 1
+            prev_word = cur_word
 
-        prev_word = word
-
-    return mapping, prev_word
+        if not yielded and prev_word != '':
+            # line had no words, assume it's a start of a new paragraph
+            cur_word = ''
+            yield prev_word, cur_word
+            prev_word = cur_word
 
 
 def build_dict(lines_iterable):
@@ -50,17 +45,22 @@ def build_dict(lines_iterable):
         The given iterable should produce strings - lines of text (hint: you
         can pass an open file descriptor).
     """
-    prev_word = ''
-    d = defaultdict(lambda: defaultdict(int))
+    occs = defaultdict(lambda: defaultdict(int))
+    # caps = defaultdict(str)
 
-    for line in lines_iterable:
-        mapping, prev_word = word_occurences(line, prev_word)
+    for raw_prev_word, raw_cur_word in word_pairs(lines_iterable):
+        prev_word = fix_word(raw_prev_word)
+        cur_word = fix_word(raw_cur_word)
 
-        for word in mapping:
-            for inner_word in mapping[word]:
-                d[word][inner_word] += mapping[word][inner_word]
+        occs[prev_word][cur_word] += 1
 
-    return d
+        # remember that current word should be capitalized in generated output
+        # if it's capitalized in original text and it's not the first word in
+        # the sentence
+        # if prev_word not in ['', '.'] and raw_cur_word[:1] != cur_word[:1]:
+            # caps[cur_word] = raw_prev_word
+
+    return occs
 
 
 def generate_gibberish(lines_iterable, output_words=200):
