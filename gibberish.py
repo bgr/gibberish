@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 
 
 matcher = re.compile('(\w{1,})|([.])|(,)|(--?)|(;)')
@@ -14,7 +15,10 @@ def fix_word(word):
 
 
 def word_occurences(line, prev_word=''):
-    """ Returns a mapping { word: { next_word: num_occurences } }."""
+    """ Returns a tuple (occurrence_mapping, last_seen_word).
+        The occurrence_mapping is a dict with format:
+            { word: { next_word: num_occurences } }
+    """
     mapping = {
         fix_word(prev_word): {}
     }
@@ -34,7 +38,7 @@ def word_occurences(line, prev_word=''):
 
         prev_word = word
 
-    return mapping
+    return mapping, prev_word
 
 
 def build_dict(lines_iterable):
@@ -43,11 +47,14 @@ def build_dict(lines_iterable):
         The iterable should produce strings - lines of text (hint: you can pass
         an open file descriptor).
     """
-    d = {}
+    prev_word = ''
+    d = defaultdict(lambda: defaultdict(int))
 
     for line in lines_iterable:
+        mapping, prev_word = word_occurences(line, prev_word)
 
-
-        w
+        for word in mapping:
+            for inner_word in mapping[word]:
+                d[word][inner_word] += mapping[word][inner_word]
 
     return d
