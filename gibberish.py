@@ -13,17 +13,28 @@ def fix_word(word):
     return word_fixes.get(word, word)
 
 
-def word_occurences(line):
-    """ Returns list of (word, number_of_occurrences) tuples."""
-    d = {}
+def word_occurences(line, prev_word=''):
+    """ Returns a mapping { word: { next_word: num_occurences } }."""
+    mapping = {
+        fix_word(prev_word): {}
+    }
+
     for m in matcher.finditer(line):
+        if prev_word not in mapping:
+            mapping[prev_word] = {}
+
+        d = mapping[prev_word]
+
         raw_word = m.group(0)
         word = fix_word(raw_word)
+
         if word not in d:
             d[word] = 0
         d[word] += 1
 
-    return d
+        prev_word = word
+
+    return mapping
 
 
 def build_dict(lines_iterable):
