@@ -1,5 +1,5 @@
 import pytest
-from gibberish import word_occurences, build_dict
+from gibberish import word_occurences, build_dict, gutenberg_sanitized
 
 
 class Test_word_occurences:
@@ -87,3 +87,27 @@ class Test_build_dict:
     ])
     def test_lines(self, inp, exp):
         assert build_dict(inp) == exp
+
+
+def test_gutenberg_sanitized():
+    lines = [
+        'Something irrelevant',
+        '',
+        'more stuff',
+        '',
+        '',
+        '*** START OF THIS PROJECT GUTENBERG EBOOK TEST ***',
+        '',
+        'important',
+        'also important',
+        '',
+        '*** END OF THIS PROJECT GUTENBERG EBOOK FRANKENSTEIN ***',
+        '',
+        'this should not be included',
+    ]
+    assert list(gutenberg_sanitized(lines)) == [
+        '',
+        'important',
+        'also important',
+        '',
+    ]
