@@ -3,7 +3,7 @@ from collections import defaultdict, Counter
 import random
 
 
-matcher = re.compile('(\w{1,})|([.])|(,)|(--?)|(;)')
+matcher = re.compile("""([a-zA-Z]+(?:'[a-zA-Z]+)?)|([.])|(,)|(--?)|(;)""")
 
 interpunction = ['.', ',', ';']
 
