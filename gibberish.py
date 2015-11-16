@@ -41,7 +41,15 @@ def word_pairs(lines_iterable):
 
 
 def build_dict(lines_iterable):
-    """ Returns a mapping with format { word: { next_word: num_occurences } }.
+    """ Returns a tuple (occurrence_mapping, capitalization_mapping).
+
+        The occurrence_mapping is a dict with format:
+            { word: { next_word: num_occurences } }.
+
+        The capitalization_mapping is a dict with format:
+            { word: original_word },
+        where original_word is picked from the most common capitalization
+        variant of the word.
 
         The given iterable should produce strings - lines of text (hint: you
         can pass an open file descriptor).
@@ -66,7 +74,7 @@ def build_dict(lines_iterable):
 
 
 def generate_gibberish(lines_iterable, output_words=200):
-    """ Returns list of random words, containing output_words or more elements.
+    """ Returns list of random words, containing at least output_words elements.
 
         Words are chosen based on probabilities obtained from given
         lines_iterable. The number of returned words will be a bit more than
@@ -83,6 +91,7 @@ def generate_gibberish(lines_iterable, output_words=200):
 
         next_words = list(d[prev_word].keys())
         next_word = random.choice(next_words)
+        # TODO: use the number of occurrences as a probability for random
         words.append(next_word)
 
         prev_word = next_word
