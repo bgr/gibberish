@@ -137,11 +137,12 @@ def gutenberg_sanitized(lines_iterable):
     for line in lines_iterable:
         if line.startswith('*** START OF THIS PROJECT GUTENBERG'):
             enabled = True
+            continue
         elif line.startswith('*** END OF THIS PROJECT GUTENBERG'):
-            return
-        elif enabled:
+            enabled = False
+
+        if enabled:
             yield line
-    assert enabled, "gutenberg sanitizer didn't yield any lines"
 
 
 if __name__ == '__main__':

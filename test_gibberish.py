@@ -114,10 +114,22 @@ def test_gutenberg_sanitized():
         '*** END OF THIS PROJECT GUTENBERG EBOOK FRANKENSTEIN ***',
         '',
         'this should not be included',
+        '',
+        'neither should this',
+        '',
+        '*** START OF THIS PROJECT GUTENBERG EBOOK TEST ***',
+        '',
+        'again, important',
+        '',
+        '*** END OF THIS PROJECT GUTENBERG EBOOK FRANKENSTEIN ***',
+        'this should not be included either',
     ]
     assert list(gutenberg_sanitized(lines)) == [
         '',
         'important',
         'also important',
+        '',
+        '',
+        'again, important',
         '',
     ]
