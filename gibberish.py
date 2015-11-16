@@ -1,6 +1,7 @@
 import re
-from collections import defaultdict
+from collections import defaultdict, Counter
 import random
+from pprint import pprint
 
 
 matcher = re.compile('(\w{1,})|([.])|(,)|(--?)|(;)')
@@ -36,8 +37,7 @@ def word_pairs(lines_iterable):
 
         if not yielded and prev_word != '':
             # line had no words, assume it's a start of a new paragraph
-            yield prev_word, '.'
-            yield '.', ''
+            yield prev_word, ''
             prev_word = ''
 
 
@@ -48,7 +48,7 @@ def build_dict(lines_iterable):
         can pass an open file descriptor).
     """
     occs = defaultdict(lambda: defaultdict(int))
-    caps = {}
+    caps = defaultdict(list)
 
     for raw_prev_word, raw_cur_word in word_pairs(lines_iterable):
         prev_word = fix_word(raw_prev_word)
@@ -59,9 +59,10 @@ def build_dict(lines_iterable):
         # remember that current word should be capitalized in generated output
         # if it's capitalized in original text and it's not the first word in
         # the sentence
-        if prev_word not in ['', '.'] and raw_cur_word[:1] != cur_word[:1]:
-            caps[cur_word] = raw_cur_word
+        if prev_word not in ['', '.']:
+            caps[cur_word].append(raw_cur_word)
 
+    caps = { k: Counter(v).most_common(1)[0][0] for k, v in caps.items() }
     return occs, caps
 
 
