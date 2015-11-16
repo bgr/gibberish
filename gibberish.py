@@ -12,7 +12,7 @@ word_fixes = {
     '--': '-',
 }
 
-NEW_PARAGRAPH = '\n   '
+INDENTATION = '   '
 
 
 def fix_word(word):
@@ -95,16 +95,25 @@ def generate_gibberish(lines_iterable, output_words=200):
 
 
 def textualize(words, caps_mapping):
+    start_of_text = True
     prev_word = ''
 
     for cur_word in words:
         cur_word = caps_mapping.get(cur_word, cur_word)
 
-        if prev_word == '':
-            yield NEW_PARAGRAPH
+        if start_of_text:
+            start_of_text = False
+            yield INDENTATION
             yield cur_word.capitalize()
+        elif cur_word == '':
+            if prev_word != '.':
+                yield '.'
+            yield '\n'
+            yield INDENTATION
         elif cur_word in interpunction:
             yield cur_word
+        elif prev_word == '':
+            yield cur_word.capitalize()
         elif prev_word == '.':
             yield ' '
             yield cur_word.capitalize()
