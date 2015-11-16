@@ -1,7 +1,6 @@
 import re
 from collections import defaultdict, Counter
 import random
-from pprint import pprint
 
 
 matcher = re.compile('(\w{1,})|([.])|(,)|(--?)|(;)')
@@ -133,15 +132,18 @@ def gutenberg_sanitized(lines_iterable):
             return
         elif enabled:
             yield line
+    assert enabled, "gutenberg sanitizer didn't yield any lines"
 
 
 if __name__ == '__main__':
-    import os
+    import glob
+    import fileinput
+    from contextlib import closing
 
-    path = os.path.abspath(os.path.join('txt_books', 'pg1661.txt'))
+    paths = glob.glob('txt_books/*.txt')
 
-    with open(path) as f:
-        words, caps = generate_gibberish(gutenberg_sanitized(f), 400)
+    with closing(fileinput.input(paths)) as lines:
+        words, caps = generate_gibberish(lines, 800)
         txt = ''.join(textualize(words, caps))
 
     # prevents unicode errors in Windows terminal
