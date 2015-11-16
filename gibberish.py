@@ -103,6 +103,11 @@ def generate_gibberish(lines_iterable, output_words=200):
 
 
 def textualize(words, caps_mapping):
+    """ Returns readable text from given words.
+
+        Words will be capitalized based on given mapping. Spaces, newlines and
+        indentation will be added as appropriate.
+    """
     start_of_text = True
     prev_word = ''
 
